@@ -5,7 +5,9 @@ on:
   push:
     branches:
         main
-
+env:
+  CLIENT: 'deprisa'
+  ENVIROMENT: 'qa'
 
 permissions:
   id-token: write
@@ -14,8 +16,7 @@ permissions:
 jobs:
   # 🌐 1. Desplegar Infraestructura
   deploy-infra:
-    if: github.event_name == 'workflow_dispatch'
-    name: Deploy Azure Infrastructure
+    name: Deploy Azure Infraestructure
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Infra Repo
@@ -40,9 +41,9 @@ jobs:
           template-file: ./infra/main.bicep
           parameters-file: ./infra/main.parameters.json
 
-  deploy-frontend:
-    name: Build & Deploy Frontend
-    runs-on: ubuntu-22.04
+  build-test:
+    name: Build and Test WebApp
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo
@@ -58,3 +59,41 @@ jobs:
       
       - name: Build
         run: npm run build
+
+  build-and-push-acr:
+    name: Build and Push to ACR
+    needs: [deploy-infra, build-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login 🔐
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PRO }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PRO }}
+
+      - name: Get ACR Credentials 🔑
+        id: acr-creds
+        run: |
+          ACR_NAME="acr${CLIENT}${ENVIROMENT}"
+          echo "ACR_NAME=$ACR_NAME"
+
+          CREDS=$(az acr credential show --name $ACR_NAME --query "{username:username,password:passwords[0].value}" -o json)
+          echo "ACR_USERNAME=$(echo $CREDS | jq -r .username)" >> $GITHUB_OUTPUT
+          echo "ACR_PASSWORD=$(echo $CREDS | jq -r .password)" >> $GITHUB_OUTPUT
+          echo "ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)" >> $GITHUB_OUTPUT
+
+      - name: Docker Login 🐳
+        run: |
+          echo "${{ steps.acr-creds.outputs.ACR_PASSWORD }}" | docker login ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }} \
+            -u ${{ steps.acr-creds.outputs.ACR_USERNAME }} --password-stdin
+
+      - name: Build and Push Docker Image 🚢
+        run: |
+          IMAGE_NAME="${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/todo-front:${{ github.sha }}"
+          docker build -t $IMAGE_NAME .
+          docker push $IMAGE_NAME
