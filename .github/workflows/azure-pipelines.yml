@@ -50,7 +50,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          repository: carlosgazabond/ToDoFront # Cambia a tu repositorio de tests
+          repository: CarlosGazabon/valentine # Cambia a tu repositorio de tests
 
       - name: Install Dependencies 🛠️
         run: npm install
@@ -70,7 +70,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          repository: carlosgazabond/ToDoFront # Cambia a tu repositorio de tests
+          repository: CarlosGazabon/valentine # Cambia a tu repositorio de tests
 
       - name: Azure Login 🔐
         uses: azure/login@v2
