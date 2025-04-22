@@ -26,8 +26,8 @@ jobs:
     displayName: 'Create Or Update Resource'
     inputs:
       deploymentScope: 'Subscription'
-      azureResourceManagerConnection: 'ConnectionQA'
-      subscriptionId: 'fd140ce4-1dfc-4b2b-8b52-85fe636a6953'
+      azureResourceManagerConnection: $(azureResourceManagerConnection)
+      subscriptionId: $(subscriptionId)
       action: 'Create Or Update Resource Group'
       location: '$(location)'
       templateLocation: 'Linked artifact'
