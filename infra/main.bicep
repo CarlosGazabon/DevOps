@@ -15,8 +15,6 @@ var rgName = '${toUpper('rg')}-${toUpper(cliente)}-${toUpper(env)}'
 //Parametros de App Service Plan y AppService
 param appServicePlanNameApi string
 param appServiceLinuxVersion string
-param webAppNameSettings string
-param existingRG string
 
 
 targetScope = 'subscription'
