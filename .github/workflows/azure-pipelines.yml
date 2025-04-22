@@ -2,19 +2,19 @@ name: Deploy PRO tenant 🚀
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+        main
 
 
 permissions:
   id-token: write
   contents: read
 
-env:
-  CLIENT: 'deprisa2'
-  ENVIROMENT: 'pro'
-
 jobs:
   # 🌐 1. Desplegar Infraestructura
   deploy-infra:
+    if: github.event_name == 'workflow_dispatch'
     name: Deploy Azure Infrastructure
     runs-on: ubuntu-latest
     steps:
@@ -40,3 +40,22 @@ jobs:
           template-file: ./infra/main.bicep
           parameters-file: ./infra/main.parameters.json
 
+  deploy-frontend:
+    name: Build & Deploy Frontend
+    runs-on: ubuntu-22.04
+    needs: deploy-infra
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          repository: Ars-carlosgazabond/ToDoFront # Cambia a tu repositorio de tests
+
+      - name: Install Dependencies 🛠️
+        run: npm install
+
+      - name: Test
+        run: npm test
+      
+      - name: Build
+        run: npm run build
