@@ -43,7 +43,6 @@ jobs:
   deploy-frontend:
     name: Build & Deploy Frontend
     runs-on: ubuntu-22.04
-    needs: deploy-infra
 
     steps:
       - name: Checkout Repo
