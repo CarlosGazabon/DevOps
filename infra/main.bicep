@@ -81,7 +81,3 @@ module acrModule 'acr.bicep' = {
   }
 }
 
-resource existingWebApp 'Microsoft.Web/sites@2022-03-01' existing = {
-  name: webAppNameSettings
-  scope: resourceGroup(existingRG)
-}
