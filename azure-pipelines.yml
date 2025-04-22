@@ -5,12 +5,6 @@ variables:
   location: 'East US 2'
   templateFile: 'infra/main.bicep'
   csmParametersFile: 'infra/main.parameters.json'
-  ## Suscripciones 
-  azureSubscription: ''
-  subscriptionId_NMP: ''
-  azureSubscriptionQA: 'Environment_QA'
-  azureSubscriptionBETA: 'Environment_BETA'
-  azureSubscriptionPRO: ''
 
 name: $(date:yyyyMMdd)$(rev:.r)
 
