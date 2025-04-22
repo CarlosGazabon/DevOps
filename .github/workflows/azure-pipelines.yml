@@ -48,7 +48,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          repository: Ars-carlosgazabond/ToDoFront # Cambia a tu repositorio de tests
+          repository: carlosgazabond/ToDoFront # Cambia a tu repositorio de tests
 
       - name: Install Dependencies 🛠️
         run: npm install
