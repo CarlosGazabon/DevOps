@@ -31,8 +31,8 @@ jobs:
   - task: AzureResourceManagerTemplateDeployment@3
     displayName: 'Create Or Update Resource'
     inputs:
-      deploymentScope: 'Resource Group'
-      azureResourceManagerConnection: 'QA INVENTIO'
+      deploymentScope: 'Subscription'
+      azureResourceManagerConnection: 'ConnectionQA'
       subscriptionId: 'fd140ce4-1dfc-4b2b-8b52-85fe636a6953'
       action: 'Create Or Update Resource Group'
       location: '$(location)'
