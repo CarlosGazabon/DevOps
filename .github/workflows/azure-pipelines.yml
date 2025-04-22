@@ -100,3 +100,33 @@ jobs:
           IMAGE_NAME="${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/todo-front:${{ github.sha }}"
           docker build -t $IMAGE_NAME .
           docker push $IMAGE_NAME
+
+  deploy-appservice:
+    name: Deploy to App Service 🚀
+    needs: [build-and-push-acr]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure Login 🔐
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PRO }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PRO }}
+
+      - name: Set Dynamic Variables 🧠
+        id: vars
+        run: |
+          APP_NAME="webapp-${CLIENT}-${ENVIROMENT}"
+          ACR_NAME="acr${CLIENT}${ENVIROMENT}"
+          ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
+
+      - name: Deploy to App Service 🚀
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ steps.vars.outputs.app_name }}
+          images: ${{ steps.vars.outputs.acr_login_server }}/todo-front:${{ github.sha }}
+
