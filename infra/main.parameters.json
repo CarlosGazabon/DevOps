@@ -9,16 +9,10 @@
         "value": "qa"
       },
       "cliente": {
-        "value": "DEPRISA"
+        "value": "deprisa"
       },
       "appServiceLinuxVersion": {
         "value": "DOTNETCORE|8.0"
-      },
-      "webAppNameSettings": {
-        "value": "inventio-api-qa"
-      },
-      "existingRG": {
-        "value": "RG_INVENTIO-CORE_QA"
       },
       "appServicePlanNameApi":{
         "value": "webapp-DEPRISA-qa"

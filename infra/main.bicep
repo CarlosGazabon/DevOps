@@ -19,12 +19,6 @@ param webAppNameSettings string
 param existingRG string
 
 
-//Variables para obtener lista de los app setttings
-var currentAppSettingsApi = list(resourceId(az.subscription().subscriptionId,existingRG,'Microsoft.Web/sites/config', existingWebApp.name, 'appsettings'), '2023-12-01').properties
-
-//Variables para obtener los connection strings
-var currentConnecStringsApi = list(resourceId(az.subscription().subscriptionId,existingRG,'Microsoft.Web/sites/config', existingWebApp.name, 'connectionstrings'), '2023-12-01').properties
-
 targetScope = 'subscription'
 
 resource newResourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {
@@ -40,19 +34,15 @@ module AppServices 'appservices.bicep' ={
     //*IMPORTANTE* TODA INFORMACION INGRESADA DEBE SER DENTRO LAS COMILLAS ''
     env: env //Opciones: 'qa', 'beta', 'pro'
     appServiceLinuxVersion: appServiceLinuxVersion //*RELLENAR SOLO SI ES LINUX SI NO DEJAR VACIA LAS COMILLAS* Ingrese la version de su API LINUX: 'DOTNETCORE|6.0', 'ASPNET|V4.8'
-    cliente: cliente //Ingresa el nombre del plan de la ap
-    currentAppSettings: currentAppSettingsApi
-    additionalAppSettingsApi: union({
-      'URLs:API': 'https://webapp-${cliente}-${env}.azurewebsites.net'
-      'URLs:FrontURL': env == 'pro' ? 'https://webapp-${cliente}.azurewebsites.net.com' : 'https://webapp-${cliente}-${env}.azurewebsites.net'
-      'Tenant:Id': toUpper(cliente)
-      'Tenant:Environment': toUpper(env)
-    }, env == 'pro' ? {
+    cliente: cliente 
+    additionalAppSettingsApi: {
+      URLs__API: 'https://webapp-${cliente}-${env}.azurewebsites.net'
+      URLs_FrontURL: env == 'pro' ? 'https://webapp-${cliente}.azurewebsites.net.com' : 'https://webapp-${cliente}-${env}.azurewebsites.net'
+      Tenant_Id: toUpper(cliente)
+      Tenant_Environment: toUpper(env)
       APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.outputs.instrumentationKey
       APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.outputs.instrumentationKey
-    } : {})
-    
-    currentConnecStringsApi: currentConnecStringsApi
+    }
     appServicePlanNameApi: appServicePlanNameApi
     }
   }
@@ -84,7 +74,7 @@ module acrModule 'acr.bicep' = {
   name: 'deployAcr'
   scope: resourceGroup(newResourceGroup.name)
   params: {
-    name: 'acr-${cliente}-${env}'
+    name: 'acr${cliente}${env}'
     location: location
     sku: 'Standard'
     adminUserEnabled: true

@@ -7,9 +7,6 @@ param appServicePlanNameApi string
 var appServiceApiName= 'webapp-${cliente}-${env}'
 
 
-//App settings existentes
-param currentAppSettings object
-
 //App settings nuevos
 param additionalAppSettingsApi object = {}
 
@@ -69,7 +66,7 @@ resource appServiceApp 'Microsoft.Web/sites@2023-01-01' = {
 resource siteconfig 'Microsoft.Web/sites/config@2022-03-01' = {
   parent: appServiceApp
   name: 'appsettings'
-  properties: union(currentAppSettings, additionalAppSettingsApi)
+  properties: additionalAppSettingsApi
 }
 
 

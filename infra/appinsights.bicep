@@ -2,7 +2,7 @@ param location string
 param env string
 param cliente string
 
-var appInsightsName = 'inventio-${cliente}-${env}'
+var appInsightsName = 'webapp-${cliente}-${env}'
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName

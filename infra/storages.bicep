@@ -6,7 +6,7 @@ param env string
 
 
 
-var Storagename= 'webapp-${cliente}-${env}'
+var Storagename= 'webapp${cliente}${env}'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' ={
   name: Storagename
