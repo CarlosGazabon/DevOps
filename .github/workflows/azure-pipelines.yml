@@ -90,18 +90,27 @@ jobs:
           echo "ACR_PASSWORD=$(echo $CREDS | jq -r .password)" >> $GITHUB_OUTPUT
           echo "ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)" >> $GITHUB_OUTPUT
 
-      - name: Docker Login 🐳
-        run: |
-          echo "${{ steps.acr-creds.outputs.ACR_PASSWORD }}" | docker login ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }} \
-            -u ${{ steps.acr-creds.outputs.ACR_USERNAME }} --password-stdin
+      - name: Docker Login to ACR 🔑
+        id: docker-login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}
+          username: ${{ steps.acr-creds.outputs.ACR_USERNAME }}
+          password: ${{ steps.acr-creds.outputs.ACR_PASSWORD }}
 
       - name: Build and Push Docker Image 🚢
         run: |
-          IMAGE_NAME="${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/todo-front:${{ github.sha }}"
-          docker build -t $IMAGE_NAME .
-          docker push $IMAGE_NAME
+          docker build . -t acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
+          docker push acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
+
+      - name: Deploy to App Service 🚀
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: webapp-${{ env.CLIENT }}-${{ env.ENVIROMENT }}
+          images: acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
 
   deploy-appservice:
+    if: github.event_name == 'workflow_dispatch' 
     name: Deploy to App Service 🚀
     needs: [build-and-push-acr]
     runs-on: ubuntu-latest
