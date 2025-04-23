@@ -29,7 +29,7 @@ This solution includes:
     - Pushes the image to ACR
     - Deploys the container to Azure Web App using `azure/webapps-deploy@v2`
 
-    **Multi Stage Pipeline Completed**
+    **Multi Stage Pipeline Completed**:
     ![Jobs completed](documentation-images/Captura%20de%20pantalla%202025-04-23%20090642.png)
 
     **WebApp Deployed**: 
