@@ -32,13 +32,13 @@ This solution includes:
     **Multi Stage Pipeline Completed**:
     ![Jobs completed](documentation-images/Captura%20de%20pantalla%202025-04-23%20090642.png)
 
-    **WebApp Deployed**: 
- - ![App deployed](documentation-images/Captura%20de%20pantalla%202025-04-22%20195518.png)
+  -  **WebApp Deployed**: 
+    ![App deployed](documentation-images/Captura%20de%20pantalla%202025-04-22%20195518.png)
 
- - **Diagram**:   
-    - ![Jobs completed](diagram/architecture.png)
+  - **Diagram**:   
+    ![Jobs completed](diagram/architecture.png)
 
- - **Answers.md**: 
+  - **Answers.md**: 
     - Responses to QA.
 
 
