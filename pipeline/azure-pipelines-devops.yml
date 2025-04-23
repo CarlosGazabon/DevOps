@@ -1,0 +1,101 @@
+trigger: none
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+variables:
+  vmImageName: 'ubuntu-latest'
+  location: 'East US 2'
+  templateFile: 'infra/main.bicep'
+  csmParametersFile: 'infra/main.parameters.json'
+  containerRegistry: $(Registrielogin)               
+  imageRepository: 'latest' 
+  azureSubscription: $(azureSubscription)               
+  webAppName: $(webAppName)                       
+  resourceGroupName: $(resourceGroupName)                   
+
+stages:
+
+##############################################################
+### STAGE 1: Provisionamiento de Infraestructura
+##############################################################
+
+- stage: Infrastructure
+  displayName: "Infraestructura"
+  jobs:
+    - job: ProvisionInfra
+      displayName: 'Aprovisionamiento de Infraestructura Single Tenant'
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+        - task: AzureResourceManagerTemplateDeployment@3
+          displayName: 'Create or Update Resource Group'
+          inputs:
+            deploymentScope: 'Subscription'
+            azureResourceManagerConnection: $(azureSubscription)
+            subscriptionId: $(subscriptionId)
+            action: 'Create Or Update Resource Group'
+            location: '$(location)'
+            templateLocation: 'Linked artifact'
+            csmFile: '$(templateFile)'
+            csmParametersFile: '$(csmParametersFile)'
+            overrideParameters: >
+              -env $(env)
+              -cliente $(cliente)
+              -appServiceLinuxVersion $(appServiceLinuxVersion)
+              -appServicePlanNameApi $(appServicePlanName)
+              -StorageSku $(storageSku)
+              -storageAccesTier $(storageAccesTier)
+            deploymentMode: 'Incremental'
+            deploymentName: 'DeployPipelineTemplate'
+
+##############################################################
+### STAGE 2: Build & Deploy Aplicación Node.js
+##############################################################
+
+- stage: BuildAndDeploy
+  displayName: "CI/CD Node App"
+  dependsOn: Infrastructure
+  jobs:
+    - job: BuildTestPush
+      displayName: "Build, Test & Push Docker Image"
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '18.x'
+          displayName: 'Instalar Node.js'
+
+        - script: npm install
+          displayName: 'Instalar dependencias'
+
+        - script: npm test
+          displayName: 'Ejecutar pruebas'
+
+        - script: npm run build
+          displayName: 'Build de la app'
+
+        - task: Docker@2
+          displayName: 'Build Docker Image'
+          inputs:
+            containerRegistry: $(dockerRegistryServiceConnection)
+            repository: $(imageRepository)
+            command: buildAndPush
+            Dockerfile: '**/Dockerfile'
+            tags: |
+              $(Build.BuildId)
+
+    - job: DeployToWebApp
+      displayName: 'Simulación Despliegue Azure Web App'
+      dependsOn: BuildTestPush
+      pool:
+        vmImage: $(vmImageName)
+      steps:
+        - task: AzureWebAppContainer@1
+          displayName: 'Desplegar en Azure Web App'
+          inputs:
+            azureSubscription: $(azureSubscription)
+            appName: $(webAppName)
+            resourceGroupName: $(resourceGroupName)
+            containers: |
+              $(containerRegistry)/$(imageRepository):$(Build.BuildId)

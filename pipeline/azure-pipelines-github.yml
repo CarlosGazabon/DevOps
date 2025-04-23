@@ -2,6 +2,9 @@ name: Deploy PRO tenant 🚀
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+        main
 env:
   CLIENT: 'deprisa'
   ENVIROMENT: 'qa'
