@@ -28,12 +28,15 @@ This solution includes:
     - Builds and tags a Docker image with the Git SHA
     - Pushes the image to ACR
     - Deploys the container to Azure Web App using `azure/webapps-deploy@v2`
+    ![Jobs completed](documentation-images/Captura%20de%20pantalla%202025-04-23%20090642.png)
 
  - **Diagram**:   
     - Architechure diagram.
 
  - **Answers.md**: 
     - Responses to QA.
+
+ - ![Architecture Diagram](documentation-images/Captura%20de%20pantalla%202025-04-22%20195518.png)
 
 ---
 
