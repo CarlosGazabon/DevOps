@@ -1,10 +1,5 @@
-## 💼 DevOps Architecture for Azure Web App Deployment
+## DevOps Architecture for Azure Web App Deployment
 
-### 🎯 Objective
-
-Automate the deployment of a Node.js-based CRM application on Azure using Infrastructure as Code (IaC), CI/CD practices, and secure, scalable cloud architecture.
-
----
 
 ### 📐 Architecture Overview
 
