@@ -5,9 +5,9 @@
 
 This solution includes:
 
-- **Developer Workflow**:
-  - Developers push code to a GitHub repository.
-  - GitHub Actions triggers a multi-stage CI/CD pipeline on every push to the `main` branch.
+- **Bicep Template**:
+  - Modularized Template.
+  - JSON Parameters for Modules.
 
 - **CI/CD Pipeline**:
   - **Stage 1: Infrastructure Provisioning**
@@ -28,6 +28,12 @@ This solution includes:
     - Builds and tags a Docker image with the Git SHA
     - Pushes the image to ACR
     - Deploys the container to Azure Web App using `azure/webapps-deploy@v2`
+
+ - **Diagram**:   
+    - Architechure diagram.
+
+ - **Answers.md**: 
+    - Responses to QA.
 
 ---
 
