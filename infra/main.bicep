@@ -40,6 +40,9 @@ module AppServices 'appservices.bicep' ={
       Tenant_Environment: toUpper(env)
       APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.outputs.instrumentationKey
       APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.outputs.instrumentationKey
+      DOCKER_REGISTRY_SERVER_URL: acrModule.outputs.acrLoginServer
+      DOCKER_REGISTRY_SERVER_USERNAME: acrModule.outputs.acrName
+
     }
     appServicePlanNameApi: appServicePlanNameApi
     }
@@ -78,4 +81,3 @@ module acrModule 'acr.bicep' = {
     adminUserEnabled: true
   }
 }
-

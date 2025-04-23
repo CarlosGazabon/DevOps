@@ -16,7 +16,7 @@ permissions:
 jobs:
   # 🌐 1. Desplegar Infraestructura
   deploy-infra:
-    name: Deploy Azure Infraestructure
+    name: Deploy Azure Infraestructure WebApp
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Infra Repo
@@ -61,8 +61,8 @@ jobs:
       - name: Build
         run: npm run build
 
-  build-and-push-acr:
-    name: Build and Push to ACR
+  release-and-deploy:
+    name: Release and Deploy WebApp
     needs: [deploy-infra, build-test]
     runs-on: ubuntu-latest
 
@@ -90,6 +90,15 @@ jobs:
           echo "ACR_PASSWORD=$(echo $CREDS | jq -r .password)" >> $GITHUB_OUTPUT
           echo "ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)" >> $GITHUB_OUTPUT
 
+      - name: Set App Settings for App Service 🔧
+        run: |
+          az webapp config appsettings set \
+            --name webapp-${{ env.CLIENT }}-${{ env.ENVIROMENT }} \
+            --resource-group RG-${{ env.CLIENT }}-${{ env.ENVIROMENT }} \
+            --settings \
+              DOCKER_REGISTRY_SERVER_PASSWORD="${{ steps.acr-creds.outputs.ACR_PASSWORD }}"
+          
+
       - name: Docker Login to ACR 🔑
         id: docker-login
         uses: azure/docker-login@v1
@@ -100,42 +109,13 @@ jobs:
 
       - name: Build and Push Docker Image 🚢
         run: |
-          docker build . -t acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
-          docker push acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
+          docker build . -t ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/latest:${{ github.sha }}
+          docker push ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/latest:${{ github.sha }}
 
       - name: Deploy to App Service 🚀
         uses: azure/webapps-deploy@v2
         with:
           app-name: webapp-${{ env.CLIENT }}-${{ env.ENVIROMENT }}
-          images: acrdeprisaqa.azurecr.io/latest:${{ github.sha }}
+          images: ${{ steps.acr-creds.outputs.ACR_LOGIN_SERVER }}/latest:${{ github.sha }}
 
-  deploy-appservice:
-    if: github.event_name == 'workflow_dispatch' 
-    name: Deploy to App Service 🚀
-    needs: [build-and-push-acr]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Azure Login 🔐
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID_PRO }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PRO }}
-
-      - name: Set Dynamic Variables 🧠
-        id: vars
-        run: |
-          APP_NAME="webapp-${CLIENT}-${ENVIROMENT}"
-          ACR_NAME="acr${CLIENT}${ENVIROMENT}"
-          ACR_LOGIN_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
-
-          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
-          echo "acr_login_server=$ACR_LOGIN_SERVER" >> $GITHUB_OUTPUT
-
-      - name: Deploy to App Service 🚀
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ steps.vars.outputs.app_name }}
-          images: ${{ steps.vars.outputs.acr_login_server }}/todo-front:${{ github.sha }}
 
